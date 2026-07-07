@@ -174,5 +174,8 @@ export function frontierIntegrity(repo: Competition): boolean {
 export const fmtPct = (x: number | null | undefined, digits = 1) =>
   x == null ? "—" : `${(x * 100).toFixed(digits)}%`;
 
+export const fmtP = (p: number | null | undefined) =>
+  p == null ? "—" : p < 0.001 ? p.toExponential(1) : p.toFixed(3);
+
 export const fmtTs = (ts: number) =>
   new Date(ts * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC";

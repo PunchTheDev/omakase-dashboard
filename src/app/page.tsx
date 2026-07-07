@@ -4,7 +4,7 @@ import { BarChart } from "@/components/BarChart";
 import { CopyPrompt } from "@/components/CopyPrompt";
 import { Badge, Empty, ReceiptLink, SectionTitle, StatTile, Table, Td } from "@/components/ui";
 import {
-  champions, fmtPct, fmtTs, receipts, routerBaselines, routerChampionRun, showcase,
+  champions, fmtP, fmtPct, fmtTs, receipts, routerBaselines, routerChampionRun, showcase,
 } from "@/lib/data";
 import { BOOTSTRAP_PROMPT } from "@/lib/docs";
 
@@ -32,7 +32,7 @@ export default function Now() {
           accent
           label="Routing uplift vs best single"
           value={uplift == null ? "—" : `+${(uplift * 100).toFixed(1)}pp`}
-          detail={run && routerRunId ? <>p = {run.verdict.comparison.p_value} · <ReceiptLink id={routerRunId} /></> : "no runs yet"}
+          detail={run && routerRunId ? <>p = {fmtP(run.verdict.comparison.p_value)} · <ReceiptLink id={routerRunId} /></> : "no runs yet"}
         />
         <StatTile
           label="Champion accuracy"
