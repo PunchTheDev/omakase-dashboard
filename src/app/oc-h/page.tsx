@@ -59,7 +59,7 @@ export default function OcH() {
       {entries.length ? (
         <Table head={["when", "event", "accuracy / delta", "outcome", "receipt"]}>
           {entries.map((e) => {
-            const p = e.payload as { accuracy?: number; delta?: number; tier?: string | null; passed?: boolean; note?: string };
+            const p = e.payload as { accuracy?: number; delta?: number; tier?: string | null; passed?: boolean; label?: string };
             return (
               <tr key={e.sha}>
                 <Td num>{fmtTs(e.ts)}</Td>
@@ -70,8 +70,10 @@ export default function OcH() {
                 <Td>
                   {e.kind === "run" ? (
                     p.passed ? <Badge kind="pass">tier: {p.tier}</Badge> : <Badge kind="fail">no tier</Badge>
+                  ) : e.kind === "merge" ? (
+                    <Badge kind="accent">merged · {p.label}</Badge>
                   ) : (
-                    <Badge kind="neutral">{p.note ? "baseline" : e.kind}</Badge>
+                    <Badge kind="neutral">{e.kind}</Badge>
                   )}
                 </Td>
                 <Td><ReceiptLink id={e.sha.slice(0, 12)} /></Td>
