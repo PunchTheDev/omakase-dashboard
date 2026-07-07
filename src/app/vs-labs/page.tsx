@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // vs Labs — the investor page: our open-weights stack against the field,
 // per-suite breakdown, and the receipts that make it more than a claim.
 import Link from "next/link";
@@ -7,7 +9,7 @@ import { fmtPct, showcase } from "@/lib/data";
 
 export default function VsLabs() {
   const show = showcase();
-  if (!show) {
+  if (!show || !show.contenders || Object.keys(show.contenders).length === 0) {
     return (
       <div>
         <h1 className="text-lg font-semibold">Our stack vs the labs</h1>

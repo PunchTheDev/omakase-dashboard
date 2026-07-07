@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // OC-R — the router competition: leaderboard, pool solo bars, gap analysis, MDE.
 import Link from "next/link";
 import { BarChart } from "@/components/BarChart";
@@ -22,8 +24,8 @@ export default function OcR() {
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile accent label="Champion accuracy" value={fmtPct(run?.verdict.candidate.accuracy)} />
-        <StatTile label="Oracle capture" value={run?.verdict.oracle_capture?.toFixed(2) ?? "—"}
+        <StatTile accent label="Champion accuracy" value={fmtPct(run?.verdict?.candidate?.accuracy)} />
+        <StatTile label="Oracle capture" value={run?.verdict?.oracle_capture?.toFixed(2) ?? "—"}
           detail="1.0 = all routing headroom extracted" />
         <StatTile label="Current MDE" value={run ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
           detail="gains below this cannot reach significance" />
@@ -48,7 +50,7 @@ export default function OcR() {
         <Empty>no champion yet</Empty>
       )}
 
-      {base && run && (
+      {base?.solo_axes && run?.verdict?.candidate && (
         <>
           <SectionTitle hint="why routing wins — complementary strengths">Champion vs the pool, solo</SectionTitle>
           <div className="card px-5 py-4">
@@ -60,7 +62,7 @@ export default function OcR() {
                   .map(([worker, axes]) => ({
                     label: worker,
                     value: axes.accuracy,
-                    detail: Object.entries(axes.per_suite).map(([s, v]) => `${s} ${fmtPct(v, 0)}`).join(" · "),
+                    detail: Object.entries(axes.per_suite ?? {}).map(([s, v]) => `${s} ${fmtPct(v, 0)}`).join(" · "),
                   })),
                 { label: "oracle ceiling", value: base.oracle_accuracy },
               ]}

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // OC-H — the harness competition: main baseline, delta tiers, pinned router.
 import Link from "next/link";
 import { Badge, Empty, ReceiptLink, SectionTitle, StatTile, Table, Td } from "@/components/ui";

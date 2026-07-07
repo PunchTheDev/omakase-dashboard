@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // "Now" — the 30-second page: what is this, is it working, how does it compare.
 import Link from "next/link";
 import { BarChart } from "@/components/BarChart";
@@ -13,10 +15,12 @@ export default function Now() {
   const base = routerBaselines();
   const show = showcase();
   const champs = champions();
-  const feed = receipts().slice(0, 8);
+  const allReceipts = receipts();
+  const feed = allReceipts.slice(0, 8);
 
-  const uplift = run ? run.verdict.candidate.accuracy - run.verdict.baseline.accuracy : null;
-  const routerRunId = feed.find((f) => f.entry.kind === "run" && f.repo === "oc-router")?.id;
+  const verdict = run?.verdict;
+  const uplift = verdict ? verdict.candidate.accuracy - verdict.baseline.accuracy : null;
+  const routerRunId = allReceipts.find((f) => f.entry.kind === "run" && f.repo === "oc-router")?.id;
 
   return (
     <div>
@@ -32,16 +36,16 @@ export default function Now() {
           accent
           label="Routing uplift vs best single"
           value={uplift == null ? "—" : `+${(uplift * 100).toFixed(1)}pp`}
-          detail={run && routerRunId ? <>p = {fmtP(run.verdict.comparison.p_value)} · <ReceiptLink id={routerRunId} /></> : "no runs yet"}
+          detail={run && routerRunId ? <>p = {fmtP(verdict?.comparison?.p_value)} · <ReceiptLink id={routerRunId} /></> : "no runs yet"}
         />
         <StatTile
           label="Champion accuracy"
-          value={fmtPct(run?.verdict.candidate.accuracy)}
-          detail={base ? `best single ${base.best_single}: ${fmtPct(run?.verdict.baseline.accuracy)}` : undefined}
+          value={fmtPct(run?.verdict?.candidate?.accuracy)}
+          detail={base ? `best single ${base.best_single}: ${fmtPct(run?.verdict?.baseline?.accuracy)}` : undefined}
         />
         <StatTile
           label="Oracle capture"
-          value={run?.verdict.oracle_capture == null ? "—" : run.verdict.oracle_capture.toFixed(2)}
+          value={run?.verdict?.oracle_capture == null ? "—" : run.verdict.oracle_capture.toFixed(2)}
           detail={base ? `pool ceiling ${fmtPct(base.oracle_accuracy)}` : undefined}
         />
         <StatTile

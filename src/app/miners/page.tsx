@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // Miners directory — one row per hotkey seen in the frontier logs.
 import Link from "next/link";
 import { Badge, Empty, SectionTitle, Table, Td } from "@/components/ui";

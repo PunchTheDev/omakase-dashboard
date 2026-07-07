@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // receipt ids resolve against the live ledger
+
 // The receipt page — every number on the site resolves here: scores, seeds,
 // digests, trust mode, and the command that reproduces the run.
 import Link from "next/link";

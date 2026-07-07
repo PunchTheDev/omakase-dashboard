@@ -18,6 +18,35 @@ export const DOCS: Record<string, { title: string; file: string }> = {
   faq: { title: "FAQ", file: "oc-router/docs/faq.md" },
 };
 
+// Repo-relative link → dashboard route. Applied to both oc-router and oc-harness
+// doc link spellings so no rendered doc points at a 404. `self` is the doc's own
+// MINER-AGENT route so a bare `(MINER-AGENT.md` self-link stays on this page.
+function rewriteLinks(md: string, self: string): string {
+  const rules: [string, string][] = [
+    ["(../oc-router/MINER-AGENT.md", "(/docs/miner-agent-oc-r"],
+    ["(../oc-router/docs/quickstart.md)", "(/docs/quickstart)"],
+    ["(../oc-router/docs)", "(/docs)"],
+    ["(../oc-router)", "(/docs/miner-agent-oc-r)"],
+    ["(../MINER-AGENT.md", `(${self}`],
+    ["(MINER-AGENT.md", `(${self}`],
+    ["(trust-and-verification.md)", "(/docs/trust-and-verification)"],
+    ["(changelog.md)", "(/docs/changelog)"],
+  ];
+  for (const [from, to] of rules) md = md.replaceAll(from, to);
+  return md;
+}
+
+// Neutralize the two markdown→HTML XSS vectors marked passes through. Docs are
+// repo-controlled (hash-locked in the competition repos), so this is defense in
+// depth, not the primary boundary — but the dashboard shouldn't trust upstream
+// blindly. Strips raw <script>, inline event handlers, and javascript: URLs.
+function sanitize(html: string): string {
+  return html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, '$1="#"');
+}
+
 export function renderDoc(slug: string): { title: string; html: string } | null {
   const doc = DOCS[slug];
   if (!doc) return null;
@@ -27,13 +56,9 @@ export function renderDoc(slug: string): { title: string; html: string } | null 
   } catch {
     return null;
   }
-  // Rewrite relative repo links to their dashboard equivalents where they exist.
-  md = md
-    .replaceAll("(../MINER-AGENT.md", "(/docs/miner-agent-oc-r")
-    .replaceAll("(MINER-AGENT.md", "(/docs/miner-agent-oc-r")
-    .replaceAll("(trust-and-verification.md)", "(/docs/trust-and-verification)")
-    .replaceAll("(changelog.md)", "(/docs/changelog)");
-  return { title: doc.title, html: marked.parse(md, { async: false }) as string };
+  const self = slug === "miner-agent-oc-h" ? "/docs/miner-agent-oc-h" : "/docs/miner-agent-oc-r";
+  const html = marked.parse(rewriteLinks(md, self), { async: false }) as string;
+  return { title: doc.title, html: sanitize(html) };
 }
 
 export const BOOTSTRAP_PROMPT = `You are mining the OC orchestration competitions on Gittensor (SN74).

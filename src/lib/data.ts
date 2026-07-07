@@ -2,6 +2,7 @@
 // reading the competition repos (frontier logs, run blobs, configs) and is
 // rebuildable from scratch — the Postgres ingest slots in behind these same
 // functions when webhooks arrive.
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -28,16 +29,27 @@ function read(rel: string): string | null {
 
 function readJson<T>(rel: string): T | null {
   const raw = read(rel);
-  return raw ? (JSON.parse(raw) as T) : null;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null; // a half-written blob must not 500 the whole site
+  }
 }
 
 export function frontier(repo: Competition): FrontierEntry[] {
   const raw = read(`${repo}/runs/frontier.jsonl`);
   if (!raw) return [];
-  return raw
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as FrontierEntry);
+  const out: FrontierEntry[] = [];
+  for (const line of raw.split("\n")) {
+    if (!line.trim()) continue;
+    try {
+      out.push(JSON.parse(line) as FrontierEntry); // skip a torn last line, don't crash
+    } catch {
+      break; // a truncated append is always the tail; stop here
+    }
+  }
+  return out;
 }
 
 // ---- oc-router -------------------------------------------------------------
@@ -112,12 +124,15 @@ export type Champion = {
 export function champions(): Champion[] {
   const out: Champion[] = [];
   for (const repo of ["oc-router", "oc-harness"] as const) {
-    const merges = frontier(repo).filter((e) => e.kind === "merge" || e.kind === "rebaseline");
-    const last = merges.at(-1);
+    // The crown is the last *merge* that carried a label. Rebaselines (weekly
+    // reset windows, pin bumps) refresh main's score but never re-crown, so
+    // they must not overwrite the holder — that would flip every champion card
+    // to "maintainer/baseline" every Monday.
+    const last = frontier(repo).filter((e) => e.kind === "merge" && e.payload.label).at(-1);
     if (last) {
       out.push({
         competition: repo,
-        label: (last.payload.label as string) ?? "baseline",
+        label: last.payload.label as string,
         holder: (last.payload.hotkey as string) ?? "maintainer",
         accuracy: (last.payload.accuracy as number) ?? null,
         sinceTs: last.ts,
@@ -148,13 +163,15 @@ export type GapRow = { suite: string; champion: number; bestSolo: number; bestSo
 export function gapAnalysis(): GapRow[] {
   const run = routerChampionRun();
   const base = routerBaselines();
-  if (!run || !base) return [];
-  return Object.entries(run.verdict.candidate.per_suite).map(([suite, champion]) => {
+  const perSuite = run?.verdict?.candidate?.per_suite;
+  if (!perSuite || !base?.solo_axes) return [];
+  return Object.entries(perSuite).map(([suite, champion]) => {
     let bestSoloWorker = "";
     let bestSolo = 0;
     for (const [worker, axes] of Object.entries(base.solo_axes)) {
-      if ((axes.per_suite[suite] ?? 0) > bestSolo) {
-        bestSolo = axes.per_suite[suite];
+      const s = axes.per_suite?.[suite] ?? 0;
+      if (s > bestSolo) {
+        bestSolo = s;
         bestSoloWorker = worker;
       }
     }
@@ -162,10 +179,37 @@ export function gapAnalysis(): GapRow[] {
   });
 }
 
+// Canonical encoding mirroring oc-eval/oc_eval/frontier.py `_canonical`/`_numstr`
+// exactly — numbers use a language-neutral form (integers drop the decimal,
+// others use fixed 12-decimal notation) so this reproduces the Python digest.
+// Keep the two in lockstep.
+function numstr(x: number): string {
+  if (Number.isInteger(x) && Math.abs(x) < 1e15) return String(x);
+  return x.toFixed(12).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+function canonical(v: unknown): string {
+  if (v === null) return "null";
+  if (typeof v === "boolean") return v ? "true" : "false";
+  if (typeof v === "number") return numstr(v);
+  if (typeof v === "string") return JSON.stringify(v);
+  if (Array.isArray(v)) return `[${v.map(canonical).join(",")}]`;
+  const keys = Object.keys(v as Record<string, unknown>).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${canonical((v as Record<string, unknown>)[k])}`).join(",")}}`;
+}
+
+function digest(e: FrontierEntry): string {
+  const { sha, ...body } = e; // eslint-disable-line @typescript-eslint/no-unused-vars
+  return crypto.createHash("sha256").update(canonical(body)).digest("hex");
+}
+
+/** Recompute each entry's hash and chain — the real tamper check, matching oc-eval's verifier. */
 export function frontierIntegrity(repo: Competition): boolean {
   let prev = "0".repeat(64);
-  for (const e of frontier(repo)) {
-    if (e.prev !== prev) return false;
+  const entries = frontier(repo);
+  for (let i = 0; i < entries.length; i++) {
+    const e = entries[i];
+    if (e.seq !== i || e.prev !== prev || e.sha !== digest(e)) return false;
     prev = e.sha;
   }
   return true;
@@ -177,5 +221,7 @@ export const fmtPct = (x: number | null | undefined, digits = 1) =>
 export const fmtP = (p: number | null | undefined) =>
   p == null ? "—" : p < 0.001 ? p.toExponential(1) : p.toFixed(3);
 
-export const fmtTs = (ts: number) =>
-  new Date(ts * 1000).toISOString().replace("T", " ").slice(0, 16) + " UTC";
+export const fmtTs = (ts: number | null | undefined) => {
+  const d = ts == null ? NaN : new Date(ts * 1000).getTime();
+  return Number.isNaN(d) ? "—" : new Date(d).toISOString().replace("T", " ").slice(0, 16) + " UTC";
+};

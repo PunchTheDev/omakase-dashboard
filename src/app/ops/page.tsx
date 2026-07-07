@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
+
 // Ops — maintainer view. Public in dev; behind auth in production (read-only
 // projection either way: nothing here can alter competition outcomes).
 import { Badge, SectionTitle, StatTile, Table, Td } from "@/components/ui";
