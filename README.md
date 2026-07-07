@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# oc-dashboard
 
-## Getting Started
+The public face of the OC orchestration competitions: live state for miners,
+receipts for skeptics, bar charts for everyone else.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Reads the sibling repos directly (`OC_WORKSPACE`, default `..`): frontier logs,
+run blobs, configs, and the docs markdown — the same files agents read.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**The dashboard is a projection with zero authority.** Frontier logs (hash-
+chained JSONL committed in the competition repos) + GitHub + chain state are
+canonical; every view here is derived in `src/lib/data.ts` and rebuildable from
+scratch. Compromising the dashboard can misinform but cannot alter outcomes.
 
-## Learn More
+Production path: the same `data.ts` seam ingests wrapper webhooks into
+Postgres for the live queue and spam metrics; page components don't change.
 
-To learn more about Next.js, take a look at the following resources:
+## Pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Route | What it answers |
+|---|---|
+| `/` | is it working, who holds the crowns, what's queued |
+| `/oc-r` `/oc-h` | per-competition state: lineage, MDE, gap analysis, tiers |
+| `/vs-labs` | the investor page: our stack vs the field, receipts attached |
+| `/runs/[id]` | the receipt: scores, seeds, chain binding, reproduce command |
+| `/miners` | directory + per-hotkey profiles |
+| `/docs` | rendered from the competition repos — one source of truth |
+| `/ops` | ledger integrity, pool/attestation status (auth in production) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Design: near-monochrome, one accent, tabular numerals, no marketing gloss.
+The landing page must answer *what is this → is it working → how does it
+compare* without scrolling twice.
