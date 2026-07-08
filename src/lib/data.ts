@@ -214,6 +214,7 @@ export const maintainerMetrics = () =>
 export type MinerState = {
   hotkey: string; github_login: string; credibility: number;
   submissions: number; banned: boolean;
+  next_eligible_ts?: number | null; in_flight?: boolean;
 };
 export const minerStates = () =>
   readJson<{ miners: MinerState[] }>("omakase-maintainer/state/miners.json")?.miners ?? [];

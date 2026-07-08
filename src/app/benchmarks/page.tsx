@@ -58,6 +58,23 @@ export default function Benchmarks() {
         <div className="mt-6"><Empty>benchmark descriptor not published yet</Empty></div>
       )}
 
+      <SectionTitle hint="the validator is for submissions, not iteration">Submission policy</SectionTitle>
+      <div className="card px-5 py-4 text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
+        <ul className="list-disc space-y-1 pl-5">
+          <li><b>1 canonical eval per hotkey per 24h.</b> Opening a new PR before your cooldown clears
+            <b> resets the 24h timer</b> — spamming the queue is strictly negative-EV.</li>
+          <li><b>1 open PR per hotkey</b> per competition; a second auto-closes the first.</li>
+          <li><b>Iterate locally.</b> <code>scripts/self_score.sh</code> scores your submission on the public
+            dev split — for exact parity, point it at the real pool
+            (<code>pool.openrouter.example.json</code>). The queue is for finished submissions, not testing.</li>
+          <li>A long queue is fine: your eval will come and reward is earned regardless of wait. Build a
+            local autoresearch loop; use the validator only to submit.</li>
+        </ul>
+        <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
+          Your cooldown + next-eligible time show on your <Link href="/miners" className="underline">miner profile</Link>.
+        </p>
+      </div>
+
       <p className="mt-8 text-sm" style={{ color: "var(--ink-2)" }}>
         Full comparison against the labs on the <Link href="/vs-labs" className="underline">vs Labs</Link> page ·
         audit any scored problem from a <Link href="/router" className="underline">receipt</Link>.
