@@ -20,7 +20,9 @@ export default function Now() {
 
   const verdict = run?.verdict;
   const uplift = verdict ? verdict.candidate.accuracy - verdict.baseline.accuracy : null;
-  const routerRunId = allReceipts.find((f) => f.entry.kind === "run" && f.repo === "oc-router")?.id;
+  const routerRunId = allReceipts.find(
+    (f) => f.repo === "oc-router" && (f.entry.payload.label === "champion" || f.entry.kind === "run"),
+  )?.id;
 
   return (
     <div>
