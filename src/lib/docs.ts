@@ -10,8 +10,8 @@ const WORKSPACE = process.env.OMAKASE_WORKSPACE ?? path.join(process.cwd(), ".."
 export const DOCS: Record<string, { title: string; file: string }> = {
   "how-it-works": { title: "How it works", file: "omakase-router/docs/how-it-works.md" },
   quickstart: { title: "Miner quickstart", file: "omakase-router/docs/quickstart.md" },
-  "miner-agent-omk-router": { title: "MINER-AGENT.md — OMK-R (Router)", file: "omakase-router/MINER-AGENT.md" },
-  "miner-agent-omk-harness": { title: "MINER-AGENT.md — OMK-H (Harness)", file: "omakase-harness/MINER-AGENT.md" },
+  "miner-agent-router": { title: "MINER-AGENT.md — Router competition", file: "omakase-router/MINER-AGENT.md" },
+  "miner-agent-harness": { title: "MINER-AGENT.md — Harness competition", file: "omakase-harness/MINER-AGENT.md" },
   "trust-and-verification": { title: "Trust & verification", file: "omakase-router/docs/trust-and-verification.md" },
   "rules-and-rewards": { title: "Rules & rewards", file: "omakase-router/docs/rules-and-rewards.md" },
   changelog: { title: "Changelog / resets", file: "omakase-router/docs/changelog.md" },
@@ -23,7 +23,7 @@ export const DOCS: Record<string, { title: string; file: string }> = {
 // MINER-AGENT route so a bare `(MINER-AGENT.md` self-link stays on this page.
 function rewriteLinks(md: string, self: string): string {
   const rules: [string, string][] = [
-    ["(../omakase-router/MINER-AGENT.md", "(/docs/miner-agent-omk-router"],
+    ["(../omakase-router/MINER-AGENT.md", "(/docs/miner-agent-router"],
     ["(../omakase-router/docs/quickstart.md)", "(/docs/quickstart)"],
     ["(../omakase-router/docs)", "(/docs)"],
     ["(../omakase-router)", "(/docs/miner-agent-omk-router)"],
@@ -56,7 +56,7 @@ export function renderDoc(slug: string): { title: string; html: string } | null 
   } catch {
     return null;
   }
-  const self = slug === "miner-agent-omk-harness" ? "/docs/miner-agent-omk-harness" : "/docs/miner-agent-omk-router";
+  const self = slug === "miner-agent-harness" ? "/docs/miner-agent-harness" : "/docs/miner-agent-router";
   const html = marked.parse(rewriteLinks(md, self), { async: false }) as string;
   return { title: doc.title, html: sanitize(html) };
 }
@@ -64,13 +64,13 @@ export function renderDoc(slug: string): { title: string; html: string } | null 
 const REPO_BASE = process.env.OMAKASE_REPO_BASE ?? "https://github.com/PunchTheDev";
 const DASHBOARD_URL = process.env.OC_DASHBOARD_URL ?? "http://localhost:3000";
 
-export const BOOTSTRAP_PROMPT = `You are mining the OC orchestration competitions on Gittensor (SN74).
+export const BOOTSTRAP_PROMPT = `You are mining the OMK orchestration competitions on Gittensor (SN74).
 
 Goal: produce a submission that beats the current champion.
 1. Clone the competition repo and read MINER-AGENT.md in its root. It is the
    authoritative procedure — follow it exactly, never guess schemas.
-2. OMK-R (router weights): ${REPO_BASE}/omakase-router
-   OMK-H (harness code):   ${REPO_BASE}/omakase-harness
+2. Router (submit a routing model):  ${REPO_BASE}/omakase-router
+   Harness (submit orchestration code): ${REPO_BASE}/omakase-harness
 3. Stop at steps marked HUMAN and ask your operator (wallet, registration,
    GitHub binding). Everything else is yours.
 4. Iterate with scripts/self_score.sh until it exits 0, run

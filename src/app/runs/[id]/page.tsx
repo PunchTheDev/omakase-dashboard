@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"; // receipt ids resolve against the live 
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, SectionTitle } from "@/components/ui";
-import { entrySignature, fmtTs, frontierIntegrity, receipt } from "@/lib/data";
+import { entrySignature, fmtTs, frontierIntegrity, receipt, transcriptExists } from "@/lib/data";
 
 export default async function RunPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -15,6 +15,11 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const p = r.entry.payload as Record<string, unknown>;
   const payload = JSON.stringify(r.entry.payload, null, 2);
   const txSha = p.transcript_sha256 as string | undefined;
+  // The chain-binding section always shows the referenced transcript sha (it's
+  // part of what's signed), but only offer the per-task-log LINK if the file is
+  // actually published — a receipt can reference a transcript that wasn't
+  // committed (or gate splits, intentionally never published) and /tasks 404s.
+  const hasLog = txSha != null && transcriptExists(txSha);
   const sig = entrySignature(r.repo, r.entry.sha);
 
   const reproduce = r.repo === "omakase-router"
@@ -33,7 +38,7 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
         {r.repo} · {r.entry.kind} · {fmtTs(r.entry.ts)} · seq {r.entry.seq}
       </div>
 
-      {txSha && (
+      {hasLog && (
         <div className="mt-4 flex items-center justify-between rounded-lg px-5 py-4" style={{ background: "color-mix(in srgb, var(--accent) 7%, transparent)", border: "1px solid var(--border)" }}>
           <div className="text-sm" style={{ color: "var(--ink-2)" }}>
             The full per-task runtime log for this run is published — audit every problem, every worker call.

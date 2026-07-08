@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
 
-// vs Labs — the investor page: our open-weights stack against the field,
-// per-suite breakdown, and the receipts that make it more than a claim.
+// Showcase — the investor page: our open-weights stack against the frontier
+// labs, per-suite breakdown, and the receipts that make it more than a claim.
 import Link from "next/link";
 import { BarChart } from "@/components/BarChart";
 import { Empty, SectionTitle, Table, Td } from "@/components/ui";

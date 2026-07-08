@@ -1,12 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Info } from "./Tooltip";
 
-export function StatTile({ label, value, detail, accent }: {
-  label: string; value: ReactNode; detail?: ReactNode; accent?: boolean;
+export function StatTile({ label, value, detail, accent, info }: {
+  label: string; value: ReactNode; detail?: ReactNode; accent?: boolean; info?: string;
 }) {
   return (
     <div className="card px-5 py-4">
-      <div className="text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>{label}</div>
+      <div className="flex items-center gap-1.5 text-xs uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+        <span>{label}</span>
+        {info && <Info text={info} />}
+      </div>
       <div className="num mt-1 text-2xl font-semibold" style={accent ? { color: "var(--accent)" } : undefined}>
         {value}
       </div>

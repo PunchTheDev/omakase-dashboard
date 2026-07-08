@@ -6,7 +6,7 @@ import { BOOTSTRAP_PROMPT, DOCS } from "@/lib/docs";
 
 const GROUPS: [string, string[]][] = [
   ["Understand", ["how-it-works", "trust-and-verification", "rules-and-rewards"]],
-  ["Mine", ["quickstart", "miner-agent-omk-router", "miner-agent-omk-harness"]],
+  ["Mine", ["quickstart", "miner-agent-router", "miner-agent-harness"]],
   ["Reference", ["changelog", "faq"]],
 ];
 
@@ -21,7 +21,7 @@ export default function DocsIndex() {
         <div key={group}>
           <SectionTitle>{group}</SectionTitle>
           <div className="grid gap-3 md:grid-cols-3">
-            {slugs.map((slug) => (
+            {slugs.filter((slug) => DOCS[slug]).map((slug) => (
               <Link key={slug} href={`/docs/${slug}`} className="card px-4 py-3 text-sm hover:underline">
                 {DOCS[slug].title}
                 <div className="mt-1 text-xs" style={{ color: "var(--muted)" }}>{DOCS[slug].file}</div>

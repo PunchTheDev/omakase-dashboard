@@ -94,7 +94,11 @@ export function routerChampionRun(): RunBlob | null {
     const run = runByTranscript(txSha);
     if (run) return run.blob;
   }
-  return readJson<RunBlob>("omakase-router/runs/seed-champion.json"); // fallback for pre-agent state
+  // No committed champion merge yet (genesis / pre-agent state). There is no
+  // run-blob-shaped fallback file — `champion-baseline.json` is the incumbent
+  // *cache* with a different shape (results[], no verdict), so returning it
+  // here would break gapAnalysis. Return null; the callers all handle it.
+  return null;
 }
 export const routerConfig = () => readJson<Record<string, never>>("omakase-router/omakase-router.config.json") as
   | Record<string, any>
@@ -170,15 +174,42 @@ export function runBlobs(): { id: string; competition: Competition; blob: RunBlo
       continue;
     }
     for (const f of files) {
-      if (!f.endsWith(".json") || f.startsWith("baselines") || f.startsWith("main-baseline")) continue;
+      // Skip non-run-blobs: incumbent baselines/caches (different shape) and the
+      // `punch-{pr}.json` intermediate the maintainer emits from the eval adapter
+      // — it carries the SAME transcript_sha256 as the canonical `run-{pr}.json`
+      // (written by _write_run_blob), so indexing both would double every row and
+      // make runByTranscript non-deterministic.
+      if (
+        !f.endsWith(".json") ||
+        f.startsWith("baselines") ||
+        f.startsWith("main-baseline") ||
+        f.startsWith("champion-baseline") ||
+        f.startsWith("punch-")
+      )
+        continue;
       const blob = readJson<RunBlob>(`${dir}/${f}`);
-      if (blob?.transcript_sha256) out.push({ id: blob.transcript_sha256, competition, blob: { ...blob, competition } });
+      // Only index a run whose per-task transcript is actually on disk — a blob
+      // pointing at a missing transcript would list a dead drill-down row.
+      if (blob?.transcript_sha256 && transcriptExists(blob.transcript_sha256)) {
+        out.push({ id: blob.transcript_sha256, competition, blob: { ...blob, competition } });
+      }
     }
   }
   return out;
 }
 
 export const runByTranscript = (sha: string) => runBlobs().find((r) => r.id === sha) ?? null;
+
+/** Whether a transcript file for this content address exists on disk. */
+export function transcriptExists(sha: string): boolean {
+  return RUN_DIRS.some(([, dir]) => {
+    try {
+      return fs.existsSync(path.join(WORKSPACE, dir, "transcripts", `${sha}.json`));
+    } catch {
+      return false;
+    }
+  });
+}
 
 /** Locate a transcript file by content address across both repos. */
 export function transcript(sha: string): Transcript | null {
@@ -287,6 +318,12 @@ export function receipts(): Receipt[] {
 }
 
 export const receipt = (id: string) => receipts().find((r) => r.id === id) ?? null;
+
+/** The receipt (12-char id) whose ledger entry published a given transcript, if any.
+ *  Lets the per-task log link back to its receipt; a rejected run that never
+ *  merged has no ledger entry, so this returns null and the caller drops the link. */
+export const receiptIdByTranscript = (sha: string): string | null =>
+  receipts().find((r) => (r.entry.payload as Record<string, unknown>).transcript_sha256 === sha)?.id ?? null;
 
 export type GapRow = { suite: string; champion: number; bestSolo: number; bestSoloWorker: string; gap: number };
 

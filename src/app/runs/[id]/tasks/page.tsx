@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, SectionTitle, StatTile, Table, Td } from "@/components/ui";
-import { runByTranscript, transcript } from "@/lib/data";
+import { receiptIdByTranscript, runByTranscript, transcript } from "@/lib/data";
 
 export default async function RunTasks({
   params, searchParams,
@@ -17,6 +17,10 @@ export default async function RunTasks({
   const tx = transcript(id);
   if (!tx) notFound();
   const run = runByTranscript(id);
+  // The receipt page is keyed by the 12-char ledger-entry id, NOT this 64-char
+  // transcript sha — resolve it so "← receipt" doesn't 404. A rejected run that
+  // never merged has no ledger entry → no back-link.
+  const receiptId = receiptIdByTranscript(id);
 
   const suites = [...new Set(tx.tasks.map((t) => t.suite))];
   const wrong = tx.tasks.filter((t) => !t.correct).length;
@@ -29,7 +33,9 @@ export default async function RunTasks({
   return (
     <div>
       <div className="flex flex-wrap items-baseline gap-3">
-        <Link href={`/runs/${id}`} className="text-xs underline" style={{ color: "var(--muted)" }}>← receipt</Link>
+        {receiptId && (
+          <Link href={`/runs/${receiptId}`} className="text-xs underline" style={{ color: "var(--muted)" }}>← receipt</Link>
+        )}
         <h1 className="num text-lg font-semibold">per-task log · {id.slice(0, 12)}</h1>
         <Badge kind="neutral">{String(run?.competition ?? tx.header.competition ?? "")}</Badge>
       </div>

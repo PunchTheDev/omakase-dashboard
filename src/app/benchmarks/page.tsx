@@ -13,8 +13,8 @@ export default function Benchmarks() {
     <div>
       <h1 className="text-lg font-semibold">Benchmarks &amp; evaluation</h1>
       <p className="mt-1 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
-        How your submission is scored — structured like a Kaggle competition: a public set you tune on, a
-        private set that decides the crown.
+        How your submission is scored: a <b>public set you tune on freely</b>, and a <b>private hidden set
+        that decides the crown</b> — you never see it, so you can&apos;t overfit to it.
       </p>
 
       <SectionTitle>How an eval works</SectionTitle>
@@ -29,13 +29,15 @@ export default function Benchmarks() {
       </div>
 
       <SectionTitle hint="what to expect">The bar</SectionTitle>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <StatTile label="Gate structure" value="public dev + private gate" detail="self-score freely; the hidden set scores the crown" />
-        <StatTile label="Grading" value="objective" detail="MCQ / numeric / exact-match — no LLM judge" />
-        <StatTile label="Difficulty target" value="55–75%" detail="best single worker — max routing headroom" />
-        <StatTile label="Anti-overfit" value="rotated each round" detail="fresh seeds; retired splits published" />
-        <StatTile label="Current MDE" value={run?.mde != null ? `${(run.mde * 100).toFixed(1)}pp` : "—"} detail="gains below this can't reach significance" />
-        <StatTile label="Fairness" value="identical for all" detail="same public set; same hidden set nobody sees" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <StatTile label="Grading" value="objective" detail="MCQ / numeric / exact-match — no LLM judge"
+          info="Every task has one correct answer, checked mechanically. There is no model-graded scoring, so verdicts are deterministic and reproducible." />
+        <StatTile label="Difficulty" value="55–75%" detail="best single model accuracy"
+          info="Suites are tuned so the best single model lands in this band — hard enough that smart routing and orchestration have real headroom to win." />
+        <StatTile label="Anti-overfit" value="rotated each round" detail="fresh hidden seeds; retired splits published"
+          info="The hidden gate set is regenerated each round from a secret seed, so you can't memorize it. Retired splits are published afterward for auditing." />
+        <StatTile label="Entry bar (MDE)" value={run?.mde != null ? `${(run.mde * 100).toFixed(1)}pp` : "—"} detail="smallest provable gain"
+          info="Minimum Detectable Effect: an improvement smaller than this can't reach statistical significance on the current task count, so it can't win." />
       </div>
 
       {b ? (
@@ -58,6 +60,7 @@ export default function Benchmarks() {
         <div className="mt-6"><Empty>benchmark descriptor not published yet</Empty></div>
       )}
 
+      <section id="submission-policy" className="scroll-mt-24">
       <SectionTitle hint="the validator is for submissions, not iteration">Submission policy</SectionTitle>
       <div className="card px-5 py-4 text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
         <ul className="list-disc space-y-1 pl-5">
@@ -74,9 +77,10 @@ export default function Benchmarks() {
           Your cooldown + next-eligible time show on your <Link href="/miners" className="underline">miner profile</Link>.
         </p>
       </div>
+      </section>
 
       <p className="mt-8 text-sm" style={{ color: "var(--ink-2)" }}>
-        Full comparison against the labs on the <Link href="/vs-labs" className="underline">vs Labs</Link> page ·
+        Full comparison against the labs on the <Link href="/showcase" className="underline">Showcase</Link> page ·
         audit any scored problem from a <Link href="/router" className="underline">receipt</Link>.
       </p>
     </div>
