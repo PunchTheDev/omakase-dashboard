@@ -16,6 +16,7 @@ const NAV = [
   ["/", "Now"],
   ["/router", "Router"],
   ["/harness", "Harness"],
+  ["/benchmarks", "Benchmarks"],
   ["/vs-labs", "vs Labs"],
   ["/miners", "Miners"],
   ["/docs", "Docs"],
@@ -42,7 +43,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 pt-8">{children}</main>
         <footer className="py-6 text-center text-xs" style={{ color: "var(--muted)", borderTop: "1px solid var(--grid)" }}>
-          every number links to a receipt · frontier logs are hash-chained · Gittensor SN74
+          <div>every number links to a receipt · frontier logs are hash-chained · Gittensor SN74</div>
+          <div className="mt-1 flex justify-center gap-3">
+            <a href="https://github.com/PunchTheDev/omakase-router" className="hover:underline">omakase-router</a>
+            <a href="https://github.com/PunchTheDev/omakase-harness" className="hover:underline">omakase-harness</a>
+            <a href="https://github.com/PunchTheDev/omakase-maintainer" className="hover:underline">Punch</a>
+          </div>
         </footer>
       </body>
     </html>

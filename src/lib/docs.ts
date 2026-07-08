@@ -61,7 +61,7 @@ export function renderDoc(slug: string): { title: string; html: string } | null 
   return { title: doc.title, html: sanitize(html) };
 }
 
-const REPO_BASE = process.env.OC_REPO_BASE ?? "https://github.com/entrius";
+const REPO_BASE = process.env.OMAKASE_REPO_BASE ?? "https://github.com/PunchTheDev";
 const DASHBOARD_URL = process.env.OC_DASHBOARD_URL ?? "http://localhost:3000";
 
 export const BOOTSTRAP_PROMPT = `You are mining the OC orchestration competitions on Gittensor (SN74).

@@ -27,10 +27,29 @@ export default function Now() {
   return (
     <div>
       <p className="max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
-        Two permissionless competitions build one product: a tiny <Link href="/router" className="underline">routing model</Link> and
-        an <Link href="/harness" className="underline">orchestration harness</Link> that together beat any single model in the
-        pool. Winners hold the crown and stream emissions until dethroned. Every number below links to a
-        rerunnable receipt.
+        A pool of open models, and two permissionless competitions to orchestrate them better than any
+        single one. Winners hold the crown and stream emissions until dethroned; every number links to a
+        rerunnable, signed receipt.
+      </p>
+      <div className="mt-4 grid gap-3 md:grid-cols-2">
+        <div className="card px-5 py-4">
+          <div className="text-sm font-semibold"><Link href="/router" className="hover:underline">OMK-R · Router</Link></div>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-2)" }}>
+            The <b>brain</b>. Harness is locked, identical for all. You submit tiny router <b>weights</b> that
+            pick which worker handles each task. Win by beating the champion&apos;s accuracy.
+          </p>
+        </div>
+        <div className="card px-5 py-4">
+          <div className="text-sm font-semibold"><Link href="/harness" className="hover:underline">OMK-H · Harness</Link></div>
+          <p className="mt-1 text-sm" style={{ color: "var(--ink-2)" }}>
+            The <b>body</b>. Router is pinned (the champion), identical for all. You submit orchestration
+            <b> code</b> — retries, verification, decomposition. Win by beating main.
+          </p>
+        </div>
+      </div>
+      <p className="mt-3 text-xs" style={{ color: "var(--muted)" }}>
+        One freezes the harness and varies the model; the other freezes the model and varies the harness.
+        Same pool, same <Link href="/benchmarks" className="underline">benchmark</Link>. → measures policy vs. systems engineering.
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">

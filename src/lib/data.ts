@@ -119,6 +119,14 @@ export type Showcase = {
 
 export const showcase = () => readJson<Showcase>("omakase-eval/runs/showcase.dev.json");
 
+export type BenchmarkDescriptor = {
+  name: string;
+  structure: string;
+  difficulty_target: string;
+  suites: { suite: string; source: string; graded: string; per_split: number | string; ungameable: string }[];
+};
+export const benchmarks = () => readJson<BenchmarkDescriptor>("omakase-eval/runs/benchmarks.json");
+
 // ---- runs + transcripts (per-problem drill-down) ---------------------------
 
 export type TaskSummary = { task_id: string; suite: string; correct: boolean; tokens: number; cost: number; n_steps: number };
