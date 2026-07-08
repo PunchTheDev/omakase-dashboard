@@ -50,7 +50,7 @@ export default function Now() {
         />
         <StatTile
           label="Minimum detectable effect"
-          value={run ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
+          value={run?.mde != null ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
           detail={run ? `${run.n_tasks} tasks · the real entry fee` : undefined}
         />
       </div>

@@ -27,7 +27,7 @@ export default function OcR() {
         <StatTile accent label="Champion accuracy" value={fmtPct(run?.verdict?.candidate?.accuracy)} />
         <StatTile label="Oracle capture" value={run?.verdict?.oracle_capture?.toFixed(2) ?? "—"}
           detail="1.0 = all routing headroom extracted" />
-        <StatTile label="Current MDE" value={run ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
+        <StatTile label="Current MDE" value={run?.mde != null ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
           detail="gains below this cannot reach significance" />
         <StatTile label="Pool" value={cfg?.eval?.pool_version ?? "—"}
           detail={`weight class: ${cfg?.weight_class?.name ?? "—"}`} />

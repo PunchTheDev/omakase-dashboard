@@ -86,7 +86,16 @@ export type Baselines = {
 };
 
 export const routerBaselines = () => readJson<Baselines>("oc-router/runs/baselines.dev.json");
-export const routerChampionRun = () => readJson<RouterRun>("oc-router/runs/seed-champion.json");
+/** The reigning champion's scored run — resolved from the current champion ledger entry. */
+export function routerChampionRun(): RunBlob | null {
+  const champ = frontier("oc-router").filter((e) => e.kind === "merge" && e.payload.label === "champion").at(-1);
+  const txSha = champ?.payload.transcript_sha256 as string | undefined;
+  if (txSha) {
+    const run = runByTranscript(txSha);
+    if (run) return run.blob;
+  }
+  return readJson<RunBlob>("oc-router/runs/seed-champion.json"); // fallback for pre-agent state
+}
 export const routerConfig = () => readJson<Record<string, never>>("oc-router/oc-router.config.json") as
   | Record<string, any>
   | null;
