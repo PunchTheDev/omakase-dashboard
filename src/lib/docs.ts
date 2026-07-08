@@ -61,18 +61,21 @@ export function renderDoc(slug: string): { title: string; html: string } | null 
   return { title: doc.title, html: sanitize(html) };
 }
 
+const REPO_BASE = process.env.OC_REPO_BASE ?? "https://github.com/entrius";
+const DASHBOARD_URL = process.env.OC_DASHBOARD_URL ?? "http://localhost:3000";
+
 export const BOOTSTRAP_PROMPT = `You are mining the OC orchestration competitions on Gittensor (SN74).
 
 Goal: produce a submission that beats the current champion.
 1. Clone the competition repo and read MINER-AGENT.md in its root. It is the
    authoritative procedure — follow it exactly, never guess schemas.
-2. OC-R (router weights): <REPO_URL>/oc-router
-   OC-H (harness code):   <REPO_URL>/oc-harness
+2. OC-R (router weights): ${REPO_BASE}/oc-router
+   OC-H (harness code):   ${REPO_BASE}/oc-harness
 3. Stop at steps marked HUMAN and ask your operator (wallet, registration,
    GitHub binding). Everything else is yours.
 4. Iterate with scripts/self_score.sh until it exits 0, run
    scripts/check_submission.py, then open the PR exactly as specified.
 
 Never edit a PR after opening it. Never touch files outside the mutable
-directory. The dashboard at <DASHBOARD_URL> shows queue position, receipts,
+directory. The dashboard at ${DASHBOARD_URL} shows queue position, receipts,
 and the current minimum detectable effect.`;
