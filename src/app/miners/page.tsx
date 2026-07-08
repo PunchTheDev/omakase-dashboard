@@ -3,16 +3,18 @@ export const dynamic = "force-dynamic"; // reads sibling repos at request time �
 // Miners directory — one row per hotkey seen in the frontier logs.
 import Link from "next/link";
 import { Badge, Empty, SectionTitle, Table, Td } from "@/components/ui";
-import { champions, fmtTs, receipts } from "@/lib/data";
+import { champions, fmtTs, minerStates, receipts } from "@/lib/data";
 
 export default function Miners() {
   const champs = champions();
-  const byMiner = new Map<string, { events: number; lastTs: number }>();
+  const creds = new Map(minerStates().map((m) => [m.hotkey, m]));
+  const byMiner = new Map<string, { events: number; lastTs: number; github: string }>();
+  for (const m of minerStates()) byMiner.set(m.hotkey, { events: 0, lastTs: 0, github: m.github_login });
   for (const r of receipts()) {
     const hotkey = (r.entry.payload.hotkey as string) ?? null;
     if (!hotkey) continue;
-    const cur = byMiner.get(hotkey) ?? { events: 0, lastTs: 0 };
-    byMiner.set(hotkey, { events: cur.events + 1, lastTs: Math.max(cur.lastTs, r.entry.ts) });
+    const cur = byMiner.get(hotkey) ?? { events: 0, lastTs: 0, github: "" };
+    byMiner.set(hotkey, { events: cur.events + 1, lastTs: Math.max(cur.lastTs, r.entry.ts), github: cur.github });
   }
 
   return (
@@ -24,20 +26,24 @@ export default function Miners() {
       </p>
       <SectionTitle>Directory</SectionTitle>
       {byMiner.size ? (
-        <Table head={["hotkey", "labels held", "events", "last active", ""]}>
-          {[...byMiner.entries()].map(([hotkey, m]) => (
-            <tr key={hotkey}>
-              <Td num>{hotkey}</Td>
-              <Td>
-                {champs.filter((c) => c.holder === hotkey).map((c) => (
-                  <Badge key={c.competition} kind="accent">{c.label} · {c.competition}</Badge>
-                ))}
-              </Td>
-              <Td num>{m.events}</Td>
-              <Td num>{fmtTs(m.lastTs)}</Td>
-              <Td><Link href={`/miners/${encodeURIComponent(hotkey)}`} className="text-xs underline" style={{ color: "var(--accent)" }}>profile</Link></Td>
-            </tr>
-          ))}
+        <Table head={["miner", "credibility", "labels held", "events", "last active", ""]}>
+          {[...byMiner.entries()].map(([hotkey, m]) => {
+            const c = creds.get(hotkey);
+            return (
+              <tr key={hotkey}>
+                <Td>{m.github ? <span>{m.github} <span className="num" style={{ color: "var(--muted)" }}>· {hotkey.slice(0, 8)}…</span></span> : <span className="num">{hotkey.slice(0, 12)}…</span>}</Td>
+                <Td num>{c ? (c.banned ? <Badge kind="fail">banlisted</Badge> : c.credibility.toFixed(2)) : "—"}</Td>
+                <Td>
+                  {champs.filter((ch) => ch.holder === hotkey).map((ch) => (
+                    <Badge key={ch.competition} kind="accent">{ch.label} · {ch.competition}</Badge>
+                  ))}
+                </Td>
+                <Td num>{m.events}</Td>
+                <Td num>{m.lastTs ? fmtTs(m.lastTs) : "—"}</Td>
+                <Td><Link href={`/miners/${encodeURIComponent(hotkey)}`} className="text-xs underline" style={{ color: "var(--accent)" }}>profile</Link></Td>
+              </tr>
+            );
+          })}
         </Table>
       ) : (
         <Empty>no miner activity yet</Empty>

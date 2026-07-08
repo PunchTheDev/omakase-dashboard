@@ -196,10 +196,32 @@ export const maintainerMetrics = () =>
 
 export type MinerState = {
   hotkey: string; github_login: string; credibility: number;
-  submissions: number; labels: string[]; banned: boolean;
+  submissions: number; banned: boolean;
 };
 export const minerStates = () =>
   readJson<{ miners: MinerState[] }>("oc-maintainer/state/miners.json")?.miners ?? [];
+
+// ---- ledger signatures (maintainer-signed, ed25519) ------------------------
+
+const maintainerPubkey = () =>
+  readJson<{ pubkey: string }>("oc-maintainer/state/maintainer.pub.json")?.pubkey ?? null;
+
+type SigRecord = { alg: string; by: string; pubkey: string; sig: string };
+
+/** Verify one entry's maintainer signature against the published public key. */
+export function entrySignature(repo: Competition, entrySha: string): { by: string; verified: boolean } | null {
+  const store = readJson<Record<string, SigRecord>>(`${repo}/runs/signatures.json`);
+  const rec = store?.[entrySha];
+  const pub = maintainerPubkey();
+  if (!rec || !pub || rec.pubkey !== pub) return null;
+  const verified = crypto.verify(
+    null,
+    Buffer.from(entrySha),
+    { key: Buffer.from(`302a300506032b6570032100${pub}`, "hex"), format: "der", type: "spki" },
+    Buffer.from(rec.sig, "hex"),
+  );
+  return { by: rec.by, verified };
+}
 
 // ---- derived views ----------------------------------------------------------
 

@@ -6,7 +6,7 @@ import { BarChart } from "@/components/BarChart";
 import { CopyPrompt } from "@/components/CopyPrompt";
 import { Badge, Empty, ReceiptLink, SectionTitle, StatTile, Table, Td } from "@/components/ui";
 import {
-  champions, fmtP, fmtPct, fmtTs, receipts, routerBaselines, routerChampionRun, showcase,
+  champions, fmtP, fmtPct, fmtTs, queue, receipts, routerBaselines, routerChampionRun, showcase,
 } from "@/lib/data";
 import { BOOTSTRAP_PROMPT } from "@/lib/docs";
 
@@ -95,7 +95,21 @@ export default function Now() {
       )}
 
       <SectionTitle hint="pure FIFO — position is public">Eval queue</SectionTitle>
-      <Empty>no pending evaluations — submissions are gated the moment they arrive</Empty>
+      {queue().length ? (
+        <Table head={["#", "competition", "PR", "miner", "status"]}>
+          {queue().map((q) => (
+            <tr key={`${q.competition}-${q.pr}`}>
+              <Td num>{q.position}</Td>
+              <Td>{q.competition}</Td>
+              <Td num>#{q.pr}</Td>
+              <Td>{q.github_login}</Td>
+              <Td><Badge kind="neutral">{q.status}</Badge></Td>
+            </tr>
+          ))}
+        </Table>
+      ) : (
+        <Empty>no pending evaluations — the queue is clear</Empty>
+      )}
 
       <SectionTitle>Activity</SectionTitle>
       {feed.length ? (
