@@ -110,6 +110,97 @@ export type Showcase = {
 
 export const showcase = () => readJson<Showcase>("oc-eval/runs/showcase.dev.json");
 
+// ---- runs + transcripts (per-problem drill-down) ---------------------------
+
+export type TaskSummary = { task_id: string; suite: string; correct: boolean; tokens: number; cost: number; n_steps: number };
+
+export type RunBlob = {
+  competition: Competition;
+  transcript_sha256?: string;
+  manifest_sha256?: string;
+  split?: string;
+  seed?: number;
+  n_tasks?: number;
+  task_summary?: TaskSummary[];
+  verdict?: RouterVerdict;
+  tier?: string | null;
+  delta?: number;
+  accuracy?: number;
+  mde?: number;
+  [k: string]: unknown;
+};
+
+export type Step = { worker: string; role: string; response: string; tokens: number };
+export type TaskRecord = {
+  task_id: string; suite: string; prompt: string; correct: boolean;
+  answer: string; tokens: number; cost: number; latency_ms: number; steps: Step[];
+};
+export type Transcript = { header: Record<string, unknown>; tasks: TaskRecord[] };
+
+const RUN_DIRS: [Competition, string][] = [
+  ["oc-router", "oc-router/runs"],
+  ["oc-harness", "oc-harness/runs"],
+];
+
+/** Every run blob carrying a transcript, newest first — the drill-down index. */
+export function runBlobs(): { id: string; competition: Competition; blob: RunBlob }[] {
+  const out: { id: string; competition: Competition; blob: RunBlob }[] = [];
+  for (const [competition, dir] of RUN_DIRS) {
+    let files: string[] = [];
+    try {
+      files = fs.readdirSync(path.join(WORKSPACE, dir));
+    } catch {
+      continue;
+    }
+    for (const f of files) {
+      if (!f.endsWith(".json") || f.startsWith("baselines") || f.startsWith("main-baseline")) continue;
+      const blob = readJson<RunBlob>(`${dir}/${f}`);
+      if (blob?.transcript_sha256) out.push({ id: blob.transcript_sha256, competition, blob: { ...blob, competition } });
+    }
+  }
+  return out;
+}
+
+export const runByTranscript = (sha: string) => runBlobs().find((r) => r.id === sha) ?? null;
+
+/** Locate a transcript file by content address across both repos. */
+export function transcript(sha: string): Transcript | null {
+  for (const [, dir] of RUN_DIRS) {
+    const t = readJson<Transcript>(`${dir}/transcripts/${sha}.json`);
+    if (t) return t;
+  }
+  return null;
+}
+
+export function taskRecord(sha: string, taskId: string): TaskRecord | null {
+  return transcript(sha)?.tasks.find((t) => t.task_id === taskId) ?? null;
+}
+
+// ---- maintainer state (queue, spam metrics) --------------------------------
+// The maintainer agent (Peggy) publishes JSON snapshots the dashboard projects.
+// Absent files → empty state, never a crash.
+
+export type QueueItem = {
+  competition: Competition; pr: number; hotkey: string; github_login: string;
+  status: string; position: number; enqueued_ts: number;
+};
+
+export type MaintainerMetrics = {
+  queue_depth: number; auto_closes_24h: number; banlist_size: number;
+  evals_24h: number; updated_ts: number;
+};
+
+export const queue = () => readJson<{ items: QueueItem[] }>("oc-maintainer/state/queue.json")?.items ?? [];
+export const maintainerMetrics = () =>
+  readJson<MaintainerMetrics>("oc-maintainer/state/metrics.json");
+
+export type MinerState = {
+  hotkey: string; github_login: string; credibility: number;
+  submissions: number; labels: string[]; banned: boolean;
+};
+export const minerStates = () =>
+  readJson<{ miners: MinerState[] }>("oc-maintainer/state/miners.json")?.miners ?? [];
+
 // ---- derived views ----------------------------------------------------------
 
 export type Champion = {

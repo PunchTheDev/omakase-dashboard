@@ -12,10 +12,13 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const r = receipt(id);
   if (!r) notFound();
   const intact = frontierIntegrity(r.repo);
+  const p = r.entry.payload as Record<string, unknown>;
   const payload = JSON.stringify(r.entry.payload, null, 2);
+  const txSha = p.transcript_sha256 as string | undefined;
+  const sig = p.signature as { alg: string; by: string } | undefined;
 
   const reproduce = r.repo === "oc-router"
-    ? `cd oc-router && scripts/self_score.sh    # split ${(r.entry.payload.split as string) ?? "dev"}, seed ${(r.entry.payload.seed as number) ?? 1}`
+    ? `cd oc-router && scripts/self_score.sh    # split ${(p.split as string) ?? "dev"}, seed ${(p.seed as number) ?? 1}`
     : `cd oc-harness && scripts/self_score.sh   # paired vs main-baseline`;
 
   return (
@@ -23,22 +26,35 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
       <div className="flex flex-wrap items-baseline gap-3">
         <h1 className="num text-lg font-semibold">receipt {id}</h1>
         <Badge kind={intact ? "pass" : "fail"}>{intact ? "chain intact" : "CHAIN BROKEN"}</Badge>
-        <Badge kind="neutral">trust mode: local-trusted (dev)</Badge>
+        <Badge kind="neutral">reproducible + signed logs</Badge>
+        {sig && <Badge kind="pass">signed · {sig.by}</Badge>}
       </div>
       <div className="mt-1 text-sm" style={{ color: "var(--ink-2)" }}>
         {r.repo} · {r.entry.kind} · {fmtTs(r.entry.ts)} · seq {r.entry.seq}
       </div>
 
+      {txSha && (
+        <div className="mt-4 flex items-center justify-between rounded-lg px-5 py-4" style={{ background: "color-mix(in srgb, var(--accent) 7%, transparent)", border: "1px solid var(--border)" }}>
+          <div className="text-sm" style={{ color: "var(--ink-2)" }}>
+            The full per-task runtime log for this run is published — audit every problem, every worker call.
+          </div>
+          <Link href={`/runs/${txSha}/tasks`} className="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium" style={{ background: "var(--accent)", color: "#fff" }}>
+            View per-task log →
+          </Link>
+        </div>
+      )}
+
       <SectionTitle>Chain binding</SectionTitle>
       <div className="card num overflow-x-auto px-5 py-4 text-xs leading-6" style={{ color: "var(--ink-2)" }}>
         <div>sha&nbsp;&nbsp;{r.entry.sha}</div>
         <div>prev&nbsp;{r.entry.prev}</div>
+        {txSha && <div>transcript&nbsp;{txSha}</div>}
       </div>
 
       <SectionTitle>Payload</SectionTitle>
       <pre className="card overflow-x-auto px-5 py-4 text-xs leading-5" style={{ color: "var(--ink-2)" }}>{payload}</pre>
 
-      <SectionTitle hint="same split, same seed, same image ⇒ same verdict">Reproduce this</SectionTitle>
+      <SectionTitle hint="same split, same seed, same pool ⇒ same verdict">Reproduce this</SectionTitle>
       <pre className="card overflow-x-auto px-5 py-4 text-xs" style={{ color: "var(--ink-2)" }}>{reproduce}</pre>
       <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
         can&apos;t reproduce it? one contested re-run per receipt is honored —{" "}
