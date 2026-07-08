@@ -6,7 +6,7 @@ import { BOOTSTRAP_PROMPT, DOCS } from "@/lib/docs";
 
 const GROUPS: [string, string[]][] = [
   ["Understand", ["how-it-works", "trust-and-verification", "rules-and-rewards"]],
-  ["Mine", ["quickstart", "miner-agent-oc-r", "miner-agent-oc-h"]],
+  ["Mine", ["quickstart", "miner-agent-omk-router", "miner-agent-omk-harness"]],
   ["Reference", ["changelog", "faq"]],
 ];
 

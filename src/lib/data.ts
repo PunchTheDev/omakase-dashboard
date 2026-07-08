@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-const WORKSPACE = process.env.OC_WORKSPACE ?? path.join(process.cwd(), "..");
+const WORKSPACE = process.env.OMAKASE_WORKSPACE ?? path.join(process.cwd(), "..");
 
 export type FrontierEntry = {
   seq: number;
@@ -17,7 +17,7 @@ export type FrontierEntry = {
   sha: string;
 };
 
-export type Competition = "oc-router" | "oc-harness";
+export type Competition = "omakase-router" | "omakase-harness";
 
 function read(rel: string): string | null {
   try {
@@ -52,7 +52,7 @@ export function frontier(repo: Competition): FrontierEntry[] {
   return out;
 }
 
-// ---- oc-router -------------------------------------------------------------
+// ---- omakase-router -------------------------------------------------------------
 
 export type Axes = {
   accuracy: number;
@@ -85,28 +85,28 @@ export type Baselines = {
   solo_axes: Record<string, Axes>;
 };
 
-export const routerBaselines = () => readJson<Baselines>("oc-router/runs/baselines.dev.json");
+export const routerBaselines = () => readJson<Baselines>("omakase-router/runs/baselines.dev.json");
 /** The reigning champion's scored run — resolved from the current champion ledger entry. */
 export function routerChampionRun(): RunBlob | null {
-  const champ = frontier("oc-router").filter((e) => e.kind === "merge" && e.payload.label === "champion").at(-1);
+  const champ = frontier("omakase-router").filter((e) => e.kind === "merge" && e.payload.label === "champion").at(-1);
   const txSha = champ?.payload.transcript_sha256 as string | undefined;
   if (txSha) {
     const run = runByTranscript(txSha);
     if (run) return run.blob;
   }
-  return readJson<RunBlob>("oc-router/runs/seed-champion.json"); // fallback for pre-agent state
+  return readJson<RunBlob>("omakase-router/runs/seed-champion.json"); // fallback for pre-agent state
 }
-export const routerConfig = () => readJson<Record<string, never>>("oc-router/oc-router.config.json") as
+export const routerConfig = () => readJson<Record<string, never>>("omakase-router/omakase-router.config.json") as
   | Record<string, any>
   | null;
 
-// ---- oc-harness ------------------------------------------------------------
+// ---- omakase-harness ------------------------------------------------------------
 
 export type HarnessBaseline = { split: string; seed: number; vector: boolean[]; axes: Axes };
 
-export const harnessBaseline = () => readJson<HarnessBaseline>("oc-harness/runs/main-baseline.json");
-export const harnessConfig = () => readJson<Record<string, any>>("oc-harness/oc-harness.config.json");
-export const routerPin = () => readJson<{ source: string; weights_sha256: string }>("oc-harness/router-pin.json");
+export const harnessBaseline = () => readJson<HarnessBaseline>("omakase-harness/runs/main-baseline.json");
+export const harnessConfig = () => readJson<Record<string, any>>("omakase-harness/omakase-harness.config.json");
+export const routerPin = () => readJson<{ source: string; weights_sha256: string }>("omakase-harness/router-pin.json");
 
 // ---- showcase ---------------------------------------------------------------
 
@@ -117,7 +117,7 @@ export type Showcase = {
   contenders: Record<string, { accuracy: number; per_suite: Record<string, number>; cost_per_task: number }>;
 };
 
-export const showcase = () => readJson<Showcase>("oc-eval/runs/showcase.dev.json");
+export const showcase = () => readJson<Showcase>("omakase-eval/runs/showcase.dev.json");
 
 // ---- runs + transcripts (per-problem drill-down) ---------------------------
 
@@ -147,8 +147,8 @@ export type TaskRecord = {
 export type Transcript = { header: Record<string, unknown>; tasks: TaskRecord[] };
 
 const RUN_DIRS: [Competition, string][] = [
-  ["oc-router", "oc-router/runs"],
-  ["oc-harness", "oc-harness/runs"],
+  ["omakase-router", "omakase-router/runs"],
+  ["omakase-harness", "omakase-harness/runs"],
 ];
 
 /** Every run blob carrying a transcript, newest first — the drill-down index. */
@@ -186,7 +186,7 @@ export function taskRecord(sha: string, taskId: string): TaskRecord | null {
 }
 
 // ---- maintainer state (queue, spam metrics) --------------------------------
-// The maintainer agent (Peggy) publishes JSON snapshots the dashboard projects.
+// The maintainer agent (Punch) publishes JSON snapshots the dashboard projects.
 // Absent files → empty state, never a crash.
 
 export type QueueItem = {
@@ -199,21 +199,21 @@ export type MaintainerMetrics = {
   evals_24h: number; updated_ts: number;
 };
 
-export const queue = () => readJson<{ items: QueueItem[] }>("oc-maintainer/state/queue.json")?.items ?? [];
+export const queue = () => readJson<{ items: QueueItem[] }>("omakase-maintainer/state/queue.json")?.items ?? [];
 export const maintainerMetrics = () =>
-  readJson<MaintainerMetrics>("oc-maintainer/state/metrics.json");
+  readJson<MaintainerMetrics>("omakase-maintainer/state/metrics.json");
 
 export type MinerState = {
   hotkey: string; github_login: string; credibility: number;
   submissions: number; banned: boolean;
 };
 export const minerStates = () =>
-  readJson<{ miners: MinerState[] }>("oc-maintainer/state/miners.json")?.miners ?? [];
+  readJson<{ miners: MinerState[] }>("omakase-maintainer/state/miners.json")?.miners ?? [];
 
 // ---- ledger signatures (maintainer-signed, ed25519) ------------------------
 
 const maintainerPubkey = () =>
-  readJson<{ pubkey: string }>("oc-maintainer/state/maintainer.pub.json")?.pubkey ?? null;
+  readJson<{ pubkey: string }>("omakase-maintainer/state/maintainer.pub.json")?.pubkey ?? null;
 
 type SigRecord = { alg: string; by: string; pubkey: string; sig: string };
 
@@ -245,7 +245,7 @@ export type Champion = {
 
 export function champions(): Champion[] {
   const out: Champion[] = [];
-  for (const repo of ["oc-router", "oc-harness"] as const) {
+  for (const repo of ["omakase-router", "omakase-harness"] as const) {
     // The crown is the last *merge* that carried a label. Rebaselines (weekly
     // reset windows, pin bumps) refresh main's score but never re-crown, so
     // they must not overwrite the holder — that would flip every champion card
@@ -269,7 +269,7 @@ export type Receipt = { id: string; repo: Competition; entry: FrontierEntry };
 
 export function receipts(): Receipt[] {
   const all: Receipt[] = [];
-  for (const repo of ["oc-router", "oc-harness"] as const) {
+  for (const repo of ["omakase-router", "omakase-harness"] as const) {
     for (const entry of frontier(repo)) {
       all.push({ id: entry.sha.slice(0, 12), repo, entry });
     }
@@ -301,7 +301,7 @@ export function gapAnalysis(): GapRow[] {
   });
 }
 
-// Canonical encoding mirroring oc-eval/oc_eval/frontier.py `_canonical`/`_numstr`
+// Canonical encoding mirroring omakase-eval/omakase_eval/frontier.py `_canonical`/`_numstr`
 // exactly — numbers use a language-neutral form (integers drop the decimal,
 // others use fixed 12-decimal notation) so this reproduces the Python digest.
 // Keep the two in lockstep.
@@ -325,7 +325,7 @@ function digest(e: FrontierEntry): string {
   return crypto.createHash("sha256").update(canonical(body)).digest("hex");
 }
 
-/** Recompute each entry's hash and chain — the real tamper check, matching oc-eval's verifier. */
+/** Recompute each entry's hash and chain — the real tamper check, matching omakase-eval's verifier. */
 export function frontierIntegrity(repo: Competition): boolean {
   let prev = "0".repeat(64);
   const entries = frontier(repo);

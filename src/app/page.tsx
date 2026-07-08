@@ -21,14 +21,14 @@ export default function Now() {
   const verdict = run?.verdict;
   const uplift = verdict ? verdict.candidate.accuracy - verdict.baseline.accuracy : null;
   const routerRunId = allReceipts.find(
-    (f) => f.repo === "oc-router" && (f.entry.payload.label === "champion" || f.entry.kind === "run"),
+    (f) => f.repo === "omakase-router" && (f.entry.payload.label === "champion" || f.entry.kind === "run"),
   )?.id;
 
   return (
     <div>
       <p className="max-w-2xl text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
-        Two permissionless competitions build one product: a tiny <Link href="/oc-r" className="underline">routing model</Link> and
-        an <Link href="/oc-h" className="underline">orchestration harness</Link> that together beat any single model in the
+        Two permissionless competitions build one product: a tiny <Link href="/router" className="underline">routing model</Link> and
+        an <Link href="/harness" className="underline">orchestration harness</Link> that together beat any single model in the
         pool. Winners hold the crown and stream emissions until dethroned. Every number below links to a
         rerunnable receipt.
       </p>
@@ -62,7 +62,7 @@ export default function Now() {
         {champs.map((c) => (
           <div key={c.competition} className="card px-5 py-4">
             <div className="flex items-baseline justify-between">
-              <div className="text-sm font-semibold">{c.competition === "oc-router" ? "OC-R · router" : "OC-H · harness"}</div>
+              <div className="text-sm font-semibold">{c.competition === "omakase-router" ? "Router" : "Harness"}</div>
               <Badge kind="accent">{c.label}</Badge>
             </div>
             <div className="mt-2 flex items-baseline gap-4 text-sm" style={{ color: "var(--ink-2)" }}>
@@ -85,7 +85,7 @@ export default function Now() {
                 .map(([name, axes]) => ({
                   label: name,
                   value: axes.accuracy,
-                  highlight: name.startsWith("oc-stack"),
+                  highlight: name.startsWith("omakase-stack"),
                   detail: `cost/task ${axes.cost_per_task.toFixed(3)}`,
                 }))}
             />

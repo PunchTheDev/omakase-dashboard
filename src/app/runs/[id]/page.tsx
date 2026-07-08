@@ -17,9 +17,9 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const txSha = p.transcript_sha256 as string | undefined;
   const sig = entrySignature(r.repo, r.entry.sha);
 
-  const reproduce = r.repo === "oc-router"
-    ? `cd oc-router && scripts/self_score.sh    # split ${(p.split as string) ?? "dev"}, seed ${(p.seed as number) ?? 1}`
-    : `cd oc-harness && scripts/self_score.sh   # paired vs main-baseline`;
+  const reproduce = r.repo === "omakase-router"
+    ? `cd omakase-router && scripts/self_score.sh    # split ${(p.split as string) ?? "dev"}, seed ${(p.seed as number) ?? 1}`
+    : `cd omakase-harness && scripts/self_score.sh   # paired vs main-baseline`;
 
   return (
     <div>

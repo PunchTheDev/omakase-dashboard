@@ -7,15 +7,15 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "OC — Orchestration Competitions",
+  title: "omakase — orchestration competitions",
   description:
     "Permissionless competitions for the best open-weights routing model and orchestration harness, on Gittensor (SN74).",
 };
 
 const NAV = [
   ["/", "Now"],
-  ["/oc-r", "OC-R Router"],
-  ["/oc-h", "OC-H Harness"],
+  ["/router", "Router"],
+  ["/harness", "Harness"],
   ["/vs-labs", "vs Labs"],
   ["/miners", "Miners"],
   ["/docs", "Docs"],
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <header style={{ borderBottom: "1px solid var(--grid)", background: "var(--surface)" }}>
           <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3">
             <Link href="/" className="text-sm font-semibold tracking-tight">
-              OC<span style={{ color: "var(--accent)" }}>·</span>
+              omakase<span style={{ color: "var(--accent)" }}>·</span>
               <span className="font-normal" style={{ color: "var(--ink-2)" }}> orchestration competitions</span>
             </Link>
             <nav className="ml-auto flex flex-wrap gap-4 text-sm" style={{ color: "var(--ink-2)" }}>

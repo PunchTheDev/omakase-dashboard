@@ -20,8 +20,8 @@ export default function VsLabs() {
 
   const sorted = Object.entries(show.contenders).sort(([, a], [, b]) => b.accuracy - a.accuracy);
   const suites = Object.keys(sorted[0][1].per_suite);
-  const ours = sorted.find(([n]) => n.startsWith("oc-stack"));
-  const bestOther = sorted.find(([n]) => !n.startsWith("oc-stack"));
+  const ours = sorted.find(([n]) => n.startsWith("omakase-stack"));
+  const bestOther = sorted.find(([n]) => !n.startsWith("omakase-stack"));
   const lead = ours && bestOther ? ours[1].accuracy - bestOther[1].accuracy : null;
 
   return (
@@ -43,7 +43,7 @@ export default function VsLabs() {
           bars={sorted.map(([name, axes]) => ({
             label: name,
             value: axes.accuracy,
-            highlight: name.startsWith("oc-stack"),
+            highlight: name.startsWith("omakase-stack"),
             detail: `cost/task ${axes.cost_per_task.toFixed(3)}`,
           }))}
         />
@@ -52,8 +52,8 @@ export default function VsLabs() {
       <SectionTitle>Per-suite breakdown</SectionTitle>
       <Table head={["contender", ...suites, "composite", "cost/task"]}>
         {sorted.map(([name, axes]) => (
-          <tr key={name} style={name.startsWith("oc-stack") ? { background: "color-mix(in srgb, var(--accent) 6%, transparent)" } : undefined}>
-            <Td>{name.startsWith("oc-stack") ? <b style={{ color: "var(--ink)" }}>{name}</b> : name}</Td>
+          <tr key={name} style={name.startsWith("omakase-stack") ? { background: "color-mix(in srgb, var(--accent) 6%, transparent)" } : undefined}>
+            <Td>{name.startsWith("omakase-stack") ? <b style={{ color: "var(--ink)" }}>{name}</b> : name}</Td>
             {suites.map((s) => (
               <Td key={s} num>{fmtPct(axes.per_suite[s])}</Td>
             ))}

@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 
-// Ops — maintainer view, projected from Peggy's state store. Public in dev;
+// Ops — maintainer view, projected from Punch's state store. Public in dev;
 // behind auth in production. Read-only: nothing here alters outcomes.
 import { Badge, Empty, SectionTitle, StatTile, Table, Td } from "@/components/ui";
 import { fmtTs, frontier, frontierIntegrity, maintainerMetrics, minerStates, queue, receipts } from "@/lib/data";
 
 export default function Ops() {
-  const repos = ["oc-router", "oc-harness"] as const;
+  const repos = ["omakase-router", "omakase-harness"] as const;
   const m = maintainerMetrics();
   const miners = minerStates();
   const q = queue();

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
 
-// OC-R — the router competition: leaderboard, pool solo bars, gap analysis, MDE.
+// OMK-R — the router competition: leaderboard, pool solo bars, gap analysis, MDE.
 import Link from "next/link";
 import { BarChart } from "@/components/BarChart";
 import { Badge, Empty, ReceiptLink, SectionTitle, StatTile, Table, Td } from "@/components/ui";
@@ -13,14 +13,14 @@ export default function OcR() {
   const base = routerBaselines();
   const cfg = routerConfig();
   const gaps = gapAnalysis();
-  const merges = frontier("oc-router").filter((e) => e.kind === "merge").reverse();
+  const merges = frontier("omakase-router").filter((e) => e.kind === "merge").reverse();
 
   return (
     <div>
-      <h1 className="text-lg font-semibold">OC-R · orchestrator router</h1>
+      <h1 className="text-lg font-semibold">OMK-R · orchestrator router</h1>
       <p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--ink-2)" }}>
         Weights-only submissions. Beat the champion with paired significance; hold the crown, stream
-        emissions. <Link href="/docs/miner-agent-oc-r" className="underline">MINER-AGENT.md</Link> is the full contract.
+        emissions. <Link href="/docs/miner-agent-omk-router" className="underline">MINER-AGENT.md</Link> is the full contract.
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">

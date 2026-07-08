@@ -3,7 +3,7 @@ import { frontier, frontierIntegrity, type Competition } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
-const REPOS = new Set<Competition>(["oc-router", "oc-harness"]);
+const REPOS = new Set<Competition>(["omakase-router", "omakase-harness"]);
 
 export async function GET(_req: Request, ctx: { params: Promise<{ repo: string }> }) {
   const { repo } = await ctx.params;

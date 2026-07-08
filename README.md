@@ -1,4 +1,4 @@
-# oc-dashboard
+# omakase-dashboard
 
 The public face of the OC orchestration competitions: live state for miners,
 receipts for skeptics, bar charts for everyone else.
