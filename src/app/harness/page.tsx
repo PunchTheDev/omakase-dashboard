@@ -22,9 +22,9 @@ export default function OcH() {
       </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile accent label="Main accuracy" value={fmtPct(base?.axes.accuracy)}
+        <StatTile accent label="Main accuracy" value={fmtPct(base?.axes?.accuracy)}
           detail="the bar every PR must clear" />
-        <StatTile label="Cost per task" value={base ? base.axes.cost_per_task.toFixed(3) : "—"}
+        <StatTile label="Cost per task" value={base?.axes?.cost_per_task != null ? base.axes.cost_per_task.toFixed(3) : "—"}
           detail={`band: +${Math.round(((cfg?.eval?.cost_tolerance ?? 1.15) - 1) * 100)}%`} />
         <StatTile label="Pinned router" value={pin ? pin.weights_sha256.slice(0, 8) + "…" : "—"}
           detail={pin?.source} />

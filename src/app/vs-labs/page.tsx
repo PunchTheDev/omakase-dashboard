@@ -18,8 +18,18 @@ export default function VsLabs() {
     );
   }
 
-  const sorted = Object.entries(show.contenders).sort(([, a], [, b]) => b.accuracy - a.accuracy);
-  const suites = Object.keys(sorted[0][1].per_suite);
+  const sorted = Object.entries(show.contenders)
+    .filter(([, a]) => a && typeof a.accuracy === "number")
+    .sort(([, a], [, b]) => b.accuracy - a.accuracy);
+  if (!sorted.length) {
+    return (
+      <div>
+        <h1 className="text-lg font-semibold">Our stack vs the labs</h1>
+        <div className="mt-6"><Empty>showcase data is incomplete</Empty></div>
+      </div>
+    );
+  }
+  const suites = Object.keys(sorted.find(([, a]) => a.per_suite)?.[1].per_suite ?? {});
   const ours = sorted.find(([n]) => n.startsWith("omakase-stack"));
   const bestOther = sorted.find(([n]) => !n.startsWith("omakase-stack"));
   const lead = ours && bestOther ? ours[1].accuracy - bestOther[1].accuracy : null;
@@ -55,7 +65,7 @@ export default function VsLabs() {
           <tr key={name} style={name.startsWith("omakase-stack") ? { background: "color-mix(in srgb, var(--accent) 6%, transparent)" } : undefined}>
             <Td>{name.startsWith("omakase-stack") ? <b style={{ color: "var(--ink)" }}>{name}</b> : name}</Td>
             {suites.map((s) => (
-              <Td key={s} num>{fmtPct(axes.per_suite[s])}</Td>
+              <Td key={s} num>{fmtPct(axes.per_suite?.[s])}</Td>
             ))}
             <Td num><b>{fmtPct(axes.accuracy)}</b></Td>
             <Td num>{axes.cost_per_task.toFixed(3)}</Td>

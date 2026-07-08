@@ -19,7 +19,7 @@ export default function Now() {
   const feed = allReceipts.slice(0, 8);
 
   const verdict = run?.verdict;
-  const uplift = verdict ? verdict.candidate.accuracy - verdict.baseline.accuracy : null;
+  const uplift = verdict?.candidate?.accuracy != null && verdict?.baseline?.accuracy != null ? verdict.candidate.accuracy - verdict.baseline.accuracy : null;
   const routerRunId = allReceipts.find(
     (f) => f.repo === "omakase-router" && (f.entry.payload.label === "champion" || f.entry.kind === "run"),
   )?.id;
