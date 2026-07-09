@@ -68,6 +68,17 @@ export default function Benchmarks() {
             across a suite will carry its gains to the hidden set — memorizing specific answers is the only
             strategy this design breaks.
           </div>
+
+          <SectionTitle hint="sealed while live, opened when retired">The seed lifecycle</SectionTitle>
+          <div className="card px-5 py-4 text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
+            The gate seed is the answer key — the generators are public, so anyone holding the seed can
+            produce every hidden task and its answer. While a round is live the seed is a{" "}
+            <b>128-bit secret</b> kept off the public repo, and gate transcripts are withheld: a receipt
+            publishes the transcript&apos;s <b>hash</b>, committing to exactly what ran without revealing
+            it. When the round retires the seed is published — every receipt in it becomes reproducible
+            from source, and the split joins the public practice material. Nothing can be quietly rewritten
+            in between, because that hash was signed into the ledger up front.
+          </div>
         </>
       ) : (
         <div className="mt-6"><Empty>benchmark descriptor not published yet</Empty></div>

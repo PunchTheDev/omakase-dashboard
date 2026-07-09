@@ -22,8 +22,14 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
   const hasLog = txSha != null && transcriptExists(txSha);
   const sig = entrySignature(r.repo, r.entry.sha);
 
+  // A private (gate) run publishes no seed — that seed IS the answer key while the
+  // round is live. Never default it to 1: the command would silently score a
+  // different split and "fail to reproduce" a receipt that is perfectly honest.
+  const split = (p.split as string) ?? "dev";
+  const seed = p.seed as number | undefined;
+  const sealed = seed == null;
   const reproduce = r.repo === "omakase-router"
-    ? `cd omakase-router && scripts/self_score.sh    # split ${(p.split as string) ?? "dev"}, seed ${(p.seed as number) ?? 1}`
+    ? `cd omakase-router && scripts/self_score.sh    # split ${split}, ${sealed ? "seed released when the round retires" : `seed ${seed}`}`
     : `cd omakase-harness && scripts/self_score.sh   # paired vs main-baseline`;
 
   return (
@@ -61,6 +67,14 @@ export default async function RunPage({ params }: { params: Promise<{ id: string
 
       <SectionTitle hint="same split, same seed, same pool ⇒ same verdict">Reproduce this</SectionTitle>
       <pre className="card overflow-x-auto px-5 py-4 text-xs" style={{ color: "var(--ink-2)" }}>{reproduce}</pre>
+      {sealed && (
+        <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
+          this run scored the private <b>{split}</b> split. Its seed and transcript are sealed while the
+          round is live — publishing them would hand every miner the answer key. The transcript hash above
+          commits to exactly what ran; when the round retires, the seed is published and anyone can
+          regenerate the split and re-run this receipt.
+        </p>
+      )}
       <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
         can&apos;t reproduce it? one contested re-run per receipt is honored —{" "}
         <Link href="/docs/trust-and-verification" className="underline">the dispute path</Link>.
