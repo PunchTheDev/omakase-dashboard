@@ -126,8 +126,7 @@ export const showcase = () => readJson<Showcase>("omakase-eval/runs/showcase.dev
 export type BenchmarkDescriptor = {
   name: string;
   structure: string;
-  difficulty_target: string;
-  suites: { suite: string; source: string; graded: string; per_split: number | string; ungameable: string }[];
+  suites: { suite: string; description: string; source: string; graded: string; per_split: number | string }[];
 };
 export const benchmarks = () => readJson<BenchmarkDescriptor>("omakase-eval/runs/benchmarks.json");
 

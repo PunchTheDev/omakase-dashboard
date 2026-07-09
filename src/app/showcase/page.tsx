@@ -41,7 +41,7 @@ export default function VsLabs() {
         The champion router + champion harness, orchestrating only open-weights workers, against every
         contender solo on the identical {show.n_tasks}-task suite.
         {lead != null && lead > 0 && (
-          <> Current lead over the best non-stack contender: <b className="num" style={{ color: "var(--accent-ink)" }}>+{(lead * 100).toFixed(1)}pp</b>.</>
+          <> Current lead over the best non-stack contender: <b className="num" style={{ color: "var(--accent-ink)" }}>+{(lead * 100).toFixed(1)} percentage points</b>.</>
         )}{" "}
         Unlike self-reported lab numbers, every bar here is reproducible from two integers and a pinned
         image — see <Link href="/docs/trust-and-verification" className="underline">trust &amp; verification</Link>.

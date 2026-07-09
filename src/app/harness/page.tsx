@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic"; // reads sibling repos at request time — never prerender stale ledger state
 
 // Harness — the harness competition. Top: the bar every PR must clear + how the
-// merged accuracy has moved. Below: delta tiers, where gains live, live queue,
-// and a searchable history.
+// merged accuracy has moved. Below: the one-rule bar, where gains live, live
+// queue, and a searchable history.
 import Link from "next/link";
 import { FilterTable, type FilterRow } from "@/components/FilterTable";
 import { LineChart } from "@/components/LineChart";
-import { Badge, Empty, ReceiptLink, SectionTitle, StatTile, Table, Td } from "@/components/ui";
+import { Badge, Empty, ReceiptLink, SectionTitle, StatTile } from "@/components/ui";
 import { fmtPct, fmtTs, frontier, harnessBaseline, harnessConfig, minerStates, queue, routerPin } from "@/lib/data";
 
 export default function HarnessPage() {
@@ -14,7 +14,6 @@ export default function HarnessPage() {
   const cfg = harnessConfig();
   const pin = routerPin();
   const entries = frontier("omakase-harness").slice().reverse();
-  const tiers = cfg?.delta_tiers ?? {};
   const gh = new Map(minerStates().map((m) => [m.hotkey, m.github_login]));
   const q = queue().filter((i) => i.competition === "omakase-harness");
 
@@ -35,7 +34,7 @@ export default function HarnessPage() {
         <span key="t" className="num">{fmtTs(e.ts)}</span>,
         <span key="w">{who}</span>,
         e.kind === "merge" ? <Badge key="e" kind="accent">merged · {p.label}</Badge> : <Badge key="e" kind="neutral">{e.kind}</Badge>,
-        <span key="d" className="num">{p.delta != null ? `Δ ${p.delta >= 0 ? "+" : ""}${(p.delta * 100).toFixed(1)}pp` : fmtPct(p.accuracy)}</span>,
+        <span key="d" className="num">{p.delta != null ? `Δ ${p.delta >= 0 ? "+" : ""}${(p.delta * 100).toFixed(1)} pts` : fmtPct(p.accuracy)}</span>,
         <ReceiptLink key="r" id={e.sha.slice(0, 12)} />,
       ],
     };
@@ -46,7 +45,7 @@ export default function HarnessPage() {
       <h1 className="text-lg font-semibold">Harness · the orchestration-code competition</h1>
       <p className="mt-1 max-w-2xl text-sm" style={{ color: "var(--ink-2)" }}>
         One shared harness, continuously improved. PR a change to <code>harness/</code> that beats main with
-        paired significance; reward scales with the attested delta.{" "}
+        paired significance — any provable improvement takes the crown; hold it, stream emissions.{" "}
         <Link href="/docs/miner-agent-harness" className="underline">MINER-AGENT.md</Link> is the full contract.
       </p>
 
@@ -71,20 +70,14 @@ export default function HarnessPage() {
         <Empty>only one merge so far — the trend line appears as the harness improves</Empty>
       )}
 
-      <SectionTitle hint="all tiers require p &lt; 0.05, paired">Delta tiers</SectionTitle>
-      <Table head={["tier", "paired delta", "multiplier", "held"]}>
-        {Object.entries(tiers).map(([name, t]) => {
-          const tier = t as { min_delta: number; multiplier: number };
-          return (
-            <tr key={name}>
-              <Td><Badge kind="accent">{name}</Badge></Td>
-              <Td num>{tier.min_delta > 0 ? `≥ ${(tier.min_delta * 100).toFixed(0)}pp` : "> 0, significant"}</Td>
-              <Td num>{tier.multiplier.toFixed(1)}×</Td>
-              <Td>until the next merge strips it</Td>
-            </tr>
-          );
-        })}
-      </Table>
+      <SectionTitle hint="one rule — same as Router">The bar</SectionTitle>
+      <div className="card px-5 py-4 text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>
+        Beat main with <b>paired statistical significance</b> (McNemar, p &lt;{" "}
+        {cfg?.eval?.significance_alpha ?? 0.05}, identical tasks) within the cost band — and the crown is
+        yours, <b>regardless of how big the improvement is</b>. Significance is the spam filter: a gain has
+        to be larger than run-to-run variance to prove itself, so noise can&apos;t win. Hold the crown and
+        stream emissions until the next merge takes it.
+      </div>
 
       <SectionTitle hint="per-suite weaknesses live on the Router page's gap analysis">Where gains live</SectionTitle>
       <div className="card px-5 py-4 text-sm leading-relaxed" style={{ color: "var(--ink-2)" }}>

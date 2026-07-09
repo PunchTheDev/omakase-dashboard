@@ -34,7 +34,7 @@ export default async function MinerPage({ params }: { params: Promise<{ hotkey: 
 
   const activityRows: FilterRow[] = rows.map((r) => {
     const p = r.entry.payload as { accuracy?: number; delta?: number; label?: string };
-    const score = p.delta != null ? `Δ ${p.delta >= 0 ? "+" : ""}${(p.delta * 100).toFixed(1)}pp` : p.accuracy != null ? fmtPct(p.accuracy) : "—";
+    const score = p.delta != null ? `Δ ${p.delta >= 0 ? "+" : ""}${(p.delta * 100).toFixed(1)} pts` : p.accuracy != null ? fmtPct(p.accuracy) : "—";
     return {
       id: r.entry.sha,
       search: `${r.repo} ${r.entry.kind} ${p.label ?? ""}`,

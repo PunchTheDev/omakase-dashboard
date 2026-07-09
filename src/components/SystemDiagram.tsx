@@ -3,7 +3,7 @@
 // flows pool → router → harness → verdict → crown. The two competitions freeze
 // different halves of it — that contrast is the whole idea, so it's drawn, not
 // just described. Each stage is hoverable for a plain-English gloss.
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 type Stage = { key: string; title: string; sub: string; gloss: string; owner?: "router" | "harness" };
 
@@ -19,15 +19,14 @@ export function SystemDiagram() {
   const [hover, setHover] = useState<string | null>(null);
   return (
     <div className="card px-5 py-6">
-      <div className="flex flex-col items-stretch gap-2 md:flex-row md:items-center">
+      <div className="flex flex-col items-stretch gap-2 md:flex-row">
         {STAGES.map((s, i) => (
-          <div key={s.key} className="flex flex-1 items-center gap-2 md:flex-col">
+          <Fragment key={s.key}>
             <div
-              className="relative flex-1 rounded-lg px-3 py-3 text-center transition-colors md:w-full"
+              className="relative flex-1 rounded-lg px-3 py-3 text-center transition-colors"
               style={{
                 border: `1px solid ${s.owner ? "var(--accent)" : "var(--border)"}`,
                 background: hover === s.key ? "color-mix(in srgb, var(--accent) 8%, var(--surface))" : "var(--surface)",
-                cursor: "help",
               }}
               onMouseEnter={() => setHover(s.key)}
               onMouseLeave={() => setHover(null)}
@@ -49,9 +48,9 @@ export function SystemDiagram() {
               )}
             </div>
             {i < STAGES.length - 1 && (
-              <span aria-hidden className="shrink-0 text-sm md:rotate-90" style={{ color: "var(--baseline)" }}>→</span>
+              <span aria-hidden className="shrink-0 self-center rotate-90 text-sm md:rotate-0" style={{ color: "var(--baseline)" }}>→</span>
             )}
-          </div>
+          </Fragment>
         ))}
       </div>
 

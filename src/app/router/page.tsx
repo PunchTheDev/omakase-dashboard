@@ -61,9 +61,9 @@ export default function RouterPage() {
         <StatTile label="Oracle capture" value={run?.verdict?.oracle_capture?.toFixed(2) ?? "—"}
           detail="1.0 = all routing headroom extracted"
           info="Of the gap between the best single model and a perfect router that always picked the best model per task, how much the champion has captured." />
-        <StatTile label="Current MDE" value={run?.mde != null ? `${(run.mde * 100).toFixed(1)}pp` : "—"}
+        <StatTile label="Current MDE" value={run?.mde != null ? `${(run.mde * 100).toFixed(1)} pts` : "—"}
           detail="the real entry bar"
-          info="Minimum Detectable Effect — an improvement smaller than this can't reach statistical significance on the current task count, so it can't win." />
+          info="Minimum Detectable Effect — an accuracy improvement smaller than this (in percentage points) can't reach statistical significance on the current task count, so it can't win." />
         <StatTile label="Pool" value={cfg?.eval?.pool_version ?? "—"}
           detail={`weight class: ${cfg?.weight_class?.name ?? "—"}`}
           info="The open-weights model pool and weight class this competition orchestrates." />
@@ -80,7 +80,7 @@ export default function RouterPage() {
 
       {base?.solo_axes && run?.verdict?.candidate && (
         <>
-          <SectionTitle hint="why routing wins — complementary strengths">Champion vs the pool, solo</SectionTitle>
+          <SectionTitle hint="why routing wins — complementary strengths"><span id="pool-solo" className="scroll-mt-24">Champion vs the pool, solo</span></SectionTitle>
           <div className="card px-5 py-4">
             <BarChart
               bars={[
@@ -102,15 +102,25 @@ export default function RouterPage() {
       {gaps.length > 0 && (
         <>
           <SectionTitle hint="the intended attack surface — free targeting intel">Gap analysis</SectionTitle>
-          <Table head={["suite", "champion", "best solo (worker)", "gap"]}>
+          <Table head={["suite", "champion", "best solo (pool model)", "gap"]}>
             {gaps.map((g) => (
               <tr key={g.suite}>
-                <Td>{g.suite}</Td>
+                <Td>
+                  {run?.transcript_sha256 ? (
+                    <Link href={`/runs/${run.transcript_sha256}/tasks?suite=${encodeURIComponent(g.suite)}`}
+                      className="hover:underline" style={{ color: "var(--accent)" }}>
+                      {g.suite}
+                    </Link>
+                  ) : g.suite}
+                </Td>
                 <Td num>{fmtPct(g.champion)}</Td>
-                <Td num>{fmtPct(g.bestSolo)} ({g.bestSoloWorker})</Td>
+                <Td num>
+                  {fmtPct(g.bestSolo)}{" "}
+                  (<a href="#pool-solo" className="hover:underline" style={{ color: "var(--accent)" }}>{g.bestSoloWorker}</a>)
+                </Td>
                 <Td num>
                   <span style={{ color: g.gap < 0 ? "var(--critical)" : "var(--good-text)" }}>
-                    {g.gap >= 0 ? "+" : ""}{(g.gap * 100).toFixed(1)}pp
+                    {g.gap >= 0 ? "+" : ""}{(g.gap * 100).toFixed(1)} pts
                   </span>
                 </Td>
               </tr>
@@ -118,6 +128,8 @@ export default function RouterPage() {
           </Table>
           <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
             a negative gap is a suite where routing currently loses to the best solo worker — start there.
+            click a suite to open the champion&apos;s per-task log for it; &ldquo;best solo&rdquo; is a pool model
+            (not a miner) — its scores come from the published baseline, charted above.
           </p>
         </>
       )}

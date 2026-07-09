@@ -29,13 +29,11 @@ export function Info({ text }: { text: string }) {
       tabIndex={0}
       aria-label={text}
     >
-      <span
-        aria-hidden
-        className="inline-flex h-3.5 w-3.5 cursor-help items-center justify-center rounded-full text-[9px] font-semibold leading-none"
-        style={{ border: "1px solid var(--muted)", color: "var(--muted)" }}
-      >
-        i
-      </span>
+      <svg aria-hidden viewBox="0 0 16 16" className="h-3.5 w-3.5 cursor-pointer" style={{ color: "var(--muted)" }}>
+        <circle cx="8" cy="8" r="6.75" fill="none" stroke="currentColor" strokeWidth="1.25" />
+        <circle cx="8" cy="4.9" r="1" fill="currentColor" />
+        <rect x="7.2" y="7" width="1.6" height="5" rx="0.8" fill="currentColor" />
+      </svg>
       <Bubble text={text} show={show} />
     </span>
   );
@@ -45,7 +43,7 @@ export function Tooltip({ text, children }: { text: string; children: ReactNode 
   const [show, setShow] = useState(false);
   return (
     <span
-      className="relative inline-flex cursor-help border-b border-dotted"
+      className="relative inline-flex cursor-default border-b border-dotted"
       style={{ borderColor: "var(--muted)" }}
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}

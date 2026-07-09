@@ -116,7 +116,8 @@ export default function Home() {
               Our champion stack — open models, orchestrated — scores{" "}
               <b className="num" style={{ color: "var(--accent-ink)" }}>{fmtPct(championAcc)}</b>
               {bestSingle != null && (
-                <>, a <b className="num" style={{ color: "var(--accent-ink)" }}>+{uplift != null ? (uplift * 100).toFixed(1) : "—"}pp</b> lift over the best single model ({fmtPct(bestSingle)})</>
+                <> — beating the best single model ({fmtPct(bestSingle)}) by{" "}
+                <b className="num" style={{ color: "var(--accent-ink)" }}>{uplift != null ? (uplift * 100).toFixed(1) : "—"} percentage points</b></>
               )}
               , and holds its own against the closed frontier labs. Unlike self-reported numbers,{" "}
               <b>every bar reproduces from source</b>.
